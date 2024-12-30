@@ -96,7 +96,6 @@ fig_acumulado_compras.add_scatter(
     y=ventas_acumuladas['MONTO'], 
     mode='lines', 
     name='Ventas Acumuladas',
-    labels={'x': 'Fecha Transacción', 'y': 'Monto'},
     line=dict(color='blue')
 )
 st.plotly_chart(fig_acumulado_compras, use_container_width=True)
