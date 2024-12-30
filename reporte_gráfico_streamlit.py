@@ -15,7 +15,8 @@ def cargar_datos():
     return df_ventas, df_compras
 
 df_ventas, df_compras = cargar_datos()
-
+meses = {1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
+7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'}
 # Preparar datos
 def preparar_datos(df):
     df = df.rename(columns={'FECHA': 'FECHA_TRANSACCION', 'FECHA DOCUMENTO': 'FECHA_TRANSACCION',
@@ -24,7 +25,7 @@ def preparar_datos(df):
     df['FORMA_DE_PAGO'] = df['FORMA_DE_PAGO'].fillna("No indica medio").str.strip().str.lower()
     df['FORMA_DE_PAGO'] = df['FORMA_DE_PAGO'].replace({'credito': 'crédito'})
     df['AÑO'] = df['FECHA_TRANSACCION'].dt.year
-    df['MES'] = df['FECHA_TRANSACCION'].dt.month_name(locale='es')
+    df['MES'] = df['FECHA_TRANSACCION'].dt.month.map(meses)
     return df
 
 df_ventas = preparar_datos(df_ventas)
