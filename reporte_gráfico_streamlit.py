@@ -73,7 +73,7 @@ col3, col4 = st.columns(2)
 top_proveedores = compras_filtradas.groupby('RAZON SOCIAL')['MONTO'].sum().nlargest(10).reset_index()
 # Crear el gráfico de barras con etiquetas personalizadas
 fig_top_proveedores = px.bar(top_proveedores, x='MONTO', y='RAZON SOCIAL', orientation='h', title="Top 10 Proveedores",
-    labels={'MONTO': 'Monto Total (CLP)', 'RAZON SOCIAL': 'Proveedor'  # Etiqueta personalizada para el eje Y })
+    labels={'MONTO': 'Monto Total (CLP)', 'RAZON SOCIAL': 'Proveedor' })
 col3.plotly_chart(fig_top_proveedores, use_container_width=True)
             
 # Compras Acumuladas Mensuales
