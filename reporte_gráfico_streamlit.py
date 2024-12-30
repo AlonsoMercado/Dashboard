@@ -15,33 +15,25 @@ meses = {1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio'
 7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'}
 # Preparar datos
 def preparar_datos(df):
-    df = df.rename(columns={'FECHA': 'FECHA_TRANSACCION', 'FECHA DOCUMENTO': 'FECHA_TRANSACCION',
-                            'TOTAL': 'MONTO', 'RAZON SOCIAL': 'RAZON SOCIAL', 'FORMA DE PAGO': 'FORMA_DE_PAGO'})
+    df = df.rename(columns={'FECHA': 'FECHA_TRANSACCION', 'FECHA DOCUMENTO': 'FECHA_TRANSACCION','TOTAL': 'MONTO', 'RAZON SOCIAL': 'RAZON SOCIAL', 'FORMA DE PAGO': 'FORMA_DE_PAGO'})
     df['FECHA_TRANSACCION'] = pd.to_datetime(df['FECHA_TRANSACCION'], dayfirst=True)
     df['FORMA_DE_PAGO'] = df['FORMA_DE_PAGO'].fillna("No indica medio").str.strip().str.lower()
     df['FORMA_DE_PAGO'] = df['FORMA_DE_PAGO'].replace({'credito': 'crédito'})
     df['AÑO'] = df['FECHA_TRANSACCION'].dt.year
     df['MES'] = df['FECHA_TRANSACCION'].dt.month.map(meses)
     return df
-
 df_ventas = preparar_datos(df_ventas)
 df_compras = preparar_datos(df_compras)
-
 # Sidebar: filtros
 st.sidebar.header("Filtros")
-rango_fecha = st.sidebar.date_input("Rango de Fechas", 
-    [df_ventas['FECHA_TRANSACCION'].min(), df_ventas['FECHA_TRANSACCION'].max()]
-)
+rango_fecha = st.sidebar.date_input("Rango de Fechas",[df_ventas['FECHA_TRANSACCION'].min(), df_ventas['FECHA_TRANSACCION'].max()])
 años_seleccionados = st.sidebar.multiselect("Años", sorted(df_ventas['AÑO'].unique()), default=None)
 meses_seleccionados = st.sidebar.multiselect("Meses", sorted(df_ventas['MES'].unique()), default=None)
 forma_pago = st.sidebar.multiselect("Forma de Pago", df_ventas['FORMA_DE_PAGO'].unique(), default=None)
 
 # Función de filtrado
 def filtrar_datos(df):
-    df_filtrado = df[
-        (df['FECHA_TRANSACCION'] >= pd.to_datetime(rango_fecha[0])) &
-        (df['FECHA_TRANSACCION'] <= pd.to_datetime(rango_fecha[1]))
-    ]
+    df_filtrado = df[(df['FECHA_TRANSACCION'] >= pd.to_datetime(rango_fecha[0])) & (df['FECHA_TRANSACCION'] <= pd.to_datetime(rango_fecha[1]))]
     if años_seleccionados:
         df_filtrado = df_filtrado[df_filtrado['AÑO'].isin(años_seleccionados)]
     if meses_seleccionados:
@@ -80,19 +72,10 @@ col3, col4 = st.columns(2)
 # Top 10 Proveedores
 top_proveedores = compras_filtradas.groupby('RAZON SOCIAL')['MONTO'].sum().nlargest(10).reset_index()
 # Crear el gráfico de barras con etiquetas personalizadas
-fig_top_proveedores = px.bar(
-    top_proveedores, 
-    x='MONTO', 
-    y='RAZON SOCIAL', 
-    orientation='h', 
-    title="Top 10 Proveedores",
-    labels={
-        'MONTO': 'Monto Total (CLP)',  # Etiqueta personalizada para el eje X
-        'RAZON SOCIAL': 'Proveedor'  # Etiqueta personalizada para el eje Y 
-        })
-
+fig_top_proveedores = px.bar(top_proveedores, x='MONTO', y='RAZON SOCIAL', orientation='h', title="Top 10 Proveedores",
+    labels={'MONTO': 'Monto Total (CLP)', 'RAZON SOCIAL': 'Proveedor'  # Etiqueta personalizada para el eje Y })
 col3.plotly_chart(fig_top_proveedores, use_container_width=True)
-
+            
 # Compras Acumuladas Mensuales
 compras_acumuladas = compras_filtradas.groupby(compras_filtradas['FECHA_TRANSACCION'].dt.to_period('M'))['MONTO'].sum().reset_index()
 compras_acumuladas['FECHA_TRANSACCION'] = compras_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
@@ -113,6 +96,7 @@ fig_acumulado_compras.add_scatter(
     y=ventas_acumuladas['MONTO'], 
     mode='lines', 
     name='Ventas Acumuladas',
+    labels={'x': 'Fecha Transacción', 'y': 'Monto'},
     line=dict(color='blue')
 )
 st.plotly_chart(fig_acumulado_compras, use_container_width=True)
