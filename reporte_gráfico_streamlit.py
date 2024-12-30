@@ -58,75 +58,71 @@ def filtrar_datos(df):
 ventas_filtradas = filtrar_datos(df_ventas)
 compras_filtradas = filtrar_datos(df_compras)
 
-# Filtrar datos
-ventas_filtradas = filtrar_datos(df_ventas)
-compras_filtradas = filtrar_datos(df_compras)
+# SECCIÓN CLIENTES (VENTAS)
+st.header(" Clientes - Ventas")
+col1, col2 = st.columns(2)
 
-# Layout: Secciones principales
-st.title("📊 Dashboard de Ventas y Compras")
+# Top 10 Clientes
+top_clientes = ventas_filtradas.groupby('CLIENTE/PROVEEDOR')['MONTO'].sum().nlargest(10).reset_index()
+fig_top_clientes = px.bar(top_clientes, x='MONTO', y='CLIENTE/PROVEEDOR', orientation='h', title="Top 10 Clientes (Ventas)")
+col1.plotly_chart(fig_top_clientes, use_container_width=True)
 
-# Gráficos de Ventas
-st.header("📈 Ventas")
-col1, col2, col3 = st.columns(3)
+# Ventas Acumuladas Mensuales
+ventas_acumuladas = ventas_filtradas.groupby(ventas_filtradas['FECHA_TRANSACCION'].dt.to_period('M'))['MONTO'].sum().reset_index()
+ventas_acumuladas['FECHA_TRANSACCION'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
+fig_acumulado_ventas = px.line(ventas_acumuladas, x='FECHA_TRANSACCION', y='MONTO', title="Ventas Acumuladas Mensuales")
 
-# Gráfico 1: Top 10 Clientes por monto
-with col1:
-    if not ventas_filtradas.empty:
-        top_clientes = ventas_filtradas.groupby('CLIENTE/PROVEEDOR')['MONTO'].sum().nlargest(10).reset_index()
-        fig1 = px.bar(top_clientes, x='MONTO', y='CLIENTE/PROVEEDOR', orientation='h', title="Top 10 Clientes por Monto")
-        st.plotly_chart(fig1, use_container_width=True)
-    else:
-        st.warning("No hay datos para mostrar en este gráfico.")
+col2.plotly_chart(fig_acumulado_ventas, use_container_width=True)
 
-# Gráfico 2: Acumulado mensual
-with col2:
-    if not ventas_filtradas.empty:
-        ventas_acumuladas = ventas_filtradas.groupby(ventas_filtradas['FECHA_TRANSACCION'].dt.to_period('M')).sum().reset_index()
-        ventas_acumuladas['FECHA_TRANSACCION'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
-        fig2 = px.line(ventas_acumuladas, x='FECHA_TRANSACCION', y='MONTO', title="Acumulado Mensual de Ventas")
-        st.plotly_chart(fig2, use_container_width=True)
-    else:
-        st.warning("No hay datos para mostrar en este gráfico.")
+# Distribución por Forma de Pago (Ventas)
+st.plotly_chart(px.pie(ventas_filtradas, names='FORMA_DE_PAGO', values='MONTO', title="Distribución por Forma de Pago (Ventas)"))
 
-# Gráfico 3: Distribución por forma de pago
-with col3:
-    if not ventas_filtradas.empty:
-        forma_pago_ventas = ventas_filtradas['FORMA_DE_PAGO'].value_counts().reset_index()
-        forma_pago_ventas.columns = ['FORMA_DE_PAGO', 'Cantidad']
-        fig3 = px.pie(forma_pago_ventas, names='FORMA_DE_PAGO', values='Cantidad', title="Distribución por Forma de Pago (Ventas)")
-        st.plotly_chart(fig3, use_container_width=True)
-    else:
-        st.warning("No hay datos para mostrar en este gráfico.")
+# SECCIÓN PROVEEDORES (COMPRAS)
+st.header(" Proveedores - Compras")
+col3, col4 = st.columns(2)
 
-# Gráficos de Compras
-st.header("📉 Compras")
-col4, col5, col6 = st.columns(3)
+# Top 10 Proveedores
+top_proveedores = compras_filtradas.groupby('CLIENTE/PROVEEDOR')['MONTO'].sum().nlargest(10).reset_index()
+# Crear el gráfico de barras con etiquetas personalizadas
+fig_top_proveedores = px.bar(
+    top_proveedores, 
+    x='MONTO', 
+    y='CLIENTE/PROVEEDOR', 
+    orientation='h', 
+    title="Top 10 Proveedores",
+    labels={
+        'MONTO': 'Monto Total (CLP)',  # Etiqueta personalizada para el eje X
+        'CLIENTE/PROVEEDOR': 'Proveedor'  # Etiqueta personalizada para el eje Y 
+        })
 
-# Gráfico 4: Top 10 Proveedores por monto
-with col4:
-    if not compras_filtradas.empty:
-        top_proveedores = compras_filtradas.groupby('CLIENTE/PROVEEDOR')['MONTO'].sum().nlargest(10).reset_index()
-        fig4 = px.bar(top_proveedores, x='MONTO', y='CLIENTE/PROVEEDOR', orientation='h', title="Top 10 Proveedores por Monto")
-        st.plotly_chart(fig4, use_container_width=True)
-    else:
-        st.warning("No hay datos para mostrar en este gráfico.")
+col3.plotly_chart(fig_top_proveedores, use_container_width=True)
 
-# Gráfico 5: Acumulado mensual
-with col5:
-    if not compras_filtradas.empty:
-        compras_acumuladas = compras_filtradas.groupby(compras_filtradas['FECHA_TRANSACCION'].dt.to_period('M')).sum().reset_index()
-        compras_acumuladas['FECHA_TRANSACCION'] = compras_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
-        fig5 = px.line(compras_acumuladas, x='FECHA_TRANSACCION', y='MONTO', title="Acumulado Mensual de Compras")
-        st.plotly_chart(fig5, use_container_width=True)
-    else:
-        st.warning("No hay datos para mostrar en este gráfico.")
+# Compras Acumuladas Mensuales
+compras_acumuladas = compras_filtradas.groupby(compras_filtradas['FECHA_TRANSACCION'].dt.to_period('M'))['MONTO'].sum().reset_index()
+compras_acumuladas['FECHA_TRANSACCION'] = compras_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
+fig_acumulado_compras = px.line(
+    compras_acumuladas, x='FECHA_TRANSACCION', y='MONTO',
+    labels={'x': 'Fecha Transacción', 'y': 'Monto'},
+    title="Compras Acumuladas Mensuales"
+)
+fig_acumulado_compras.add_scatter(
+    x=compras_acumuladas['FECHA_TRANSACCION'], 
+    y=compras_acumuladas['MONTO'], 
+    mode='lines', 
+    name='Compras Acumuladas',
+    line=dict(color='red')
+)
+fig_acumulado_compras.add_scatter(
+    x=ventas_acumuladas['FECHA_TRANSACCION'], 
+    y=ventas_acumuladas['MONTO'], 
+    mode='lines', 
+    name='Ventas Acumuladas',
+    line=dict(color='blue')
+)
+st.plotly_chart(fig_acumulado_compras, use_container_width=True)
 
-# Gráfico 6: Distribución por forma de pago
-with col6:
-    if not compras_filtradas.empty:
-        forma_pago_compras = compras_filtradas['FORMA_DE_PAGO'].value_counts().reset_index()
-        forma_pago_compras.columns = ['FORMA_DE_PAGO', 'Cantidad']
-        fig6 = px.pie(forma_pago_compras, names='FORMA_DE_PAGO', values='Cantidad', title="Distribución por Forma de Pago (Compras)")
-        st.plotly_chart(fig6, use_container_width=True)
-    else:
-        st.warning("No hay datos para mostrar en este gráfico.")
+# Distribución por Forma de Pago (Compras)
+col4.plotly_chart(px.pie(compras_filtradas, names='FORMA_DE_PAGO', values='MONTO', title="Distribución por Forma de Pago (Compras)"))
+
+
+
