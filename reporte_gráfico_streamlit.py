@@ -66,7 +66,7 @@ col1.plotly_chart(fig_top_clientes, use_container_width=True)
 # Ventas Acumuladas Mensuales
 ventas_acumuladas = ventas_filtradas.groupby(ventas_filtradas['FECHA_TRANSACCION'].dt.to_period('M'))['MONTO'].sum().reset_index()
 ventas_acumuladas['FECHA_TRANSACCION'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
-fig_acumulado_ventas = px.line(ventas_acumuladas, x='FECHA TRANSACCION', y='MONTO', title="Ventas Acumuladas Mensuales")
+fig_acumulado_ventas = px.line(ventas_acumuladas, x='FECHA_TRANSACCION', y='MONTO', title="Ventas Acumuladas Mensuales")
 
 col2.plotly_chart(fig_acumulado_ventas, use_container_width=True)
 
