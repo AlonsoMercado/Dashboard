@@ -83,7 +83,7 @@ top_proveedores = compras_filtradas.groupby('RAZON SOCIAL')['MONTO'].sum().nlarg
 fig_top_proveedores = px.bar(
     top_proveedores, 
     x='MONTO', 
-    y='RAZÓN SOCIAL', 
+    y='RAZON SOCIAL', 
     orientation='h', 
     title="Top 10 Proveedores",
     labels={
