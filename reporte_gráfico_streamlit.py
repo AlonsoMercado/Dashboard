@@ -2,12 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-link_compras="https://usmcl-my.sharepoint.com/:x:/g/personal/alonso_mercado_usm_cl/Ecer7Lg47YZKsEC5fpJN0_ABRe1n88BFforXfUVWmXATsA?e=KUOLbz"
-link_ventas="https://usmcl-my.sharepoint.com/:x:/g/personal/alonso_mercado_usm_cl/EX65eEllakdNrwI8FdShcNMBW0mPbK8XQ_EX0HHBWOEyQw?e=1ybHLh"
-# Configuración de la página
 st.set_page_config(layout="wide", page_title="Dashboard de Ventas y Compras", page_icon="📊")
 
-# Cargar datos
 @st.cache_data
 def cargar_datos():
     df_ventas = pd.read_excel('KEYPROCESS_REPORTE_VENTA_20241216152610.xlsx')
@@ -20,7 +16,7 @@ meses = {1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio'
 # Preparar datos
 def preparar_datos(df):
     df = df.rename(columns={'FECHA': 'FECHA_TRANSACCION', 'FECHA DOCUMENTO': 'FECHA_TRANSACCION',
-                            'TOTAL': 'MONTO', 'RAZON SOCIAL': 'CLIENTE/PROVEEDOR', 'FORMA DE PAGO': 'FORMA_DE_PAGO'})
+                            'TOTAL': 'MONTO', 'RAZON SOCIAL': 'RAZON SOCIAL', 'FORMA DE PAGO': 'FORMA_DE_PAGO'})
     df['FECHA_TRANSACCION'] = pd.to_datetime(df['FECHA_TRANSACCION'], dayfirst=True)
     df['FORMA_DE_PAGO'] = df['FORMA_DE_PAGO'].fillna("No indica medio").str.strip().str.lower()
     df['FORMA_DE_PAGO'] = df['FORMA_DE_PAGO'].replace({'credito': 'crédito'})
@@ -63,14 +59,14 @@ st.header(" Clientes - Ventas")
 col1, col2 = st.columns(2)
 
 # Top 10 Clientes
-top_clientes = ventas_filtradas.groupby('CLIENTE/PROVEEDOR')['MONTO'].sum().nlargest(10).reset_index()
-fig_top_clientes = px.bar(top_clientes, x='MONTO', y='CLIENTE/PROVEEDOR', orientation='h', title="Top 10 Clientes (Ventas)")
+top_clientes = ventas_filtradas.groupby('RAZON SOCIAL')['MONTO'].sum().nlargest(10).reset_index()
+fig_top_clientes = px.bar(top_clientes, x='MONTO', y='RAZÓN SOCIAL', orientation='h', title="Top 10 Clientes (Ventas)")
 col1.plotly_chart(fig_top_clientes, use_container_width=True)
 
 # Ventas Acumuladas Mensuales
 ventas_acumuladas = ventas_filtradas.groupby(ventas_filtradas['FECHA_TRANSACCION'].dt.to_period('M'))['MONTO'].sum().reset_index()
 ventas_acumuladas['FECHA_TRANSACCION'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
-fig_acumulado_ventas = px.line(ventas_acumuladas, x='FECHA_TRANSACCION', y='MONTO', title="Ventas Acumuladas Mensuales")
+fig_acumulado_ventas = px.line(ventas_acumuladas, x='FECHA TRANSACCIÓN', y='MONTO', title="Ventas Acumuladas Mensuales")
 
 col2.plotly_chart(fig_acumulado_ventas, use_container_width=True)
 
@@ -82,17 +78,17 @@ st.header(" Proveedores - Compras")
 col3, col4 = st.columns(2)
 
 # Top 10 Proveedores
-top_proveedores = compras_filtradas.groupby('CLIENTE/PROVEEDOR')['MONTO'].sum().nlargest(10).reset_index()
+top_proveedores = compras_filtradas.groupby('RAZON SOCIAL')['MONTO'].sum().nlargest(10).reset_index()
 # Crear el gráfico de barras con etiquetas personalizadas
 fig_top_proveedores = px.bar(
     top_proveedores, 
     x='MONTO', 
-    y='CLIENTE/PROVEEDOR', 
+    y='RAZÓN SOCIAL', 
     orientation='h', 
     title="Top 10 Proveedores",
     labels={
         'MONTO': 'Monto Total (CLP)',  # Etiqueta personalizada para el eje X
-        'CLIENTE/PROVEEDOR': 'Proveedor'  # Etiqueta personalizada para el eje Y 
+        'RAZON SOCIAL': 'Proveedor'  # Etiqueta personalizada para el eje Y 
         })
 
 col3.plotly_chart(fig_top_proveedores, use_container_width=True)
