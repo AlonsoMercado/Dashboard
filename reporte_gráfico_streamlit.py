@@ -2,14 +2,16 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+link_compras=https://usmcl-my.sharepoint.com/:x:/r/personal/alonso_mercado_usm_cl/Documents/KEYPROCESS_REPORTE_COMPRA_20241216153042.xlsx?d=wb8ecabc7ed384a86b040b97e924dd3f0&csf=1&web=1&e=7GMEyD
+link_ventas=https://usmcl-my.sharepoint.com/:x:/r/personal/alonso_mercado_usm_cl/Documents/KEYPROCESS_REPORTE_VENTA_20241216152610.xlsx?d=w4978b97e6a654d47af023c15d4a170d3&csf=1&web=1&e=F7761k
 # Configuración de la página
 st.set_page_config(layout="wide", page_title="Dashboard de Ventas y Compras", page_icon="📊")
 
 # Cargar datos
 @st.cache_data
 def cargar_datos():
-    df_ventas = pd.read_excel('.devcontainer/KEYPROCESS_REPORTE_VENTA_20241216152610.xlsx')
-    df_compras = pd.read_excel('.devcontainer/KEYPROCESS_REPORTE_COMPRA_20241216153042.xlsx')
+    df_ventas = pd.read_excel(link_ventas)
+    df_compras = pd.read_excel(link_compras)
     return df_ventas, df_compras
 
 df_ventas, df_compras = cargar_datos()
