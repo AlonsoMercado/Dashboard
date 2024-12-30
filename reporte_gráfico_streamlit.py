@@ -60,7 +60,7 @@ col1, col2 = st.columns(2)
 
 # Top 10 Clientes
 top_clientes = ventas_filtradas.groupby('RAZON SOCIAL')['MONTO'].sum().nlargest(10).reset_index()
-fig_top_clientes = px.bar(top_clientes, x='MONTO', y='RAZÓN SOCIAL', orientation='h', title="Top 10 Clientes (Ventas)")
+fig_top_clientes = px.bar(top_clientes, x='MONTO', y='RAZON SOCIAL', orientation='h', title="Top 10 Clientes (Ventas)")
 col1.plotly_chart(fig_top_clientes, use_container_width=True)
 
 # Ventas Acumuladas Mensuales
