@@ -8,8 +8,8 @@ st.set_page_config(layout="wide", page_title="Dashboard de Ventas y Compras", pa
 # Cargar datos
 @st.cache_data
 def cargar_datos():
-    df_ventas = pd.read_excel('C:/Users/alons/Downloads/KEYPROCESS_REPORTE_VENTA_20241216152610.xlsx')
-    df_compras = pd.read_excel('C:/Users/alons/Downloads/KEYPROCESS_REPORTE_COMPRA_20241216153042.xlsx')
+    df_ventas = pd.read_excel('data/KEYPROCESS_REPORTE_VENTA_20241216152610.xlsx')
+    df_compras = pd.read_excel('data/KEYPROCESS_REPORTE_COMPRA_20241216153042.xlsx')
     return df_ventas, df_compras
 
 df_ventas, df_compras = cargar_datos()
