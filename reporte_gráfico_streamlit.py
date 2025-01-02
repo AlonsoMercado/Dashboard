@@ -46,39 +46,22 @@ def filtrar_datos(df):
 ventas_filtradas = filtrar_datos(df_ventas)
 compras_filtradas = filtrar_datos(df_compras)
 
-# SECCIÓN CLIENTES (VENTAS)
 st.header(" Clientes - Ventas")
-col1, col2 = st.columns(2)
-
-# Top 10 Clientes
-top_clientes = ventas_filtradas.groupby('RAZON SOCIAL')['MONTO'].sum().nlargest(10).reset_index()
-fig_top_clientes = px.bar(top_clientes, x='MONTO', y='RAZON SOCIAL', orientation='h', title="Top 10 Clientes (Ventas)")
-col1.plotly_chart(fig_top_clientes, use_container_width=True)
 
 # Ventas Acumuladas Mensuales
+# Procesamiento de ventas acumuladas
 ventas_acumuladas = ventas_filtradas.groupby(ventas_filtradas['FECHA_TRANSACCION'].dt.to_period('M'))['MONTO'].sum().reset_index()
 ventas_acumuladas['FECHA_TRANSACCION'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
-fig_acumulado_ventas = px.line(ventas_acumuladas, x='FECHA_TRANSACCION', y='MONTO', title="Ventas Acumuladas Mensuales")
+ventas_acumuladas['MES'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.month
+ventas_acumuladas['AÑO'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.year
 
-col2.plotly_chart(fig_acumulado_ventas, use_container_width=True)
-
-# Distribución por Forma de Pago (Ventas)
-st.plotly_chart(px.pie(ventas_filtradas, names='FORMA_DE_PAGO', values='MONTO', title="Distribución por Forma de Pago (Ventas)"))
-
-# SECCIÓN PROVEEDORES (COMPRAS)
-st.header(" Proveedores - Compras")
-col3, col4 = st.columns(2)
-
-# Top 10 Proveedores
-top_proveedores = compras_filtradas.groupby('RAZON SOCIAL')['MONTO'].sum().nlargest(10).reset_index()
-# Crear el gráfico de barras con etiquetas personalizadas
-fig_top_proveedores = px.bar(top_proveedores, x='MONTO', y='RAZON SOCIAL', orientation='h', title="Top 10 Proveedores",
-    labels={'MONTO': 'Monto Total (CLP)', 'RAZON SOCIAL': 'Proveedor' })
-col3.plotly_chart(fig_top_proveedores, use_container_width=True)
-            
-# Compras Acumuladas Mensuales
+# Procesamiento de compras acumuladas
 compras_acumuladas = compras_filtradas.groupby(compras_filtradas['FECHA_TRANSACCION'].dt.to_period('M'))['MONTO'].sum().reset_index()
 compras_acumuladas['FECHA_TRANSACCION'] = compras_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
+compras_acumuladas['MES'] = compras_acumuladas['FECHA_TRANSACCION'].dt.month  # Corrección aquí
+compras_acumuladas['AÑO'] = compras_acumuladas['FECHA_TRANSACCION'].dt.year  # Corrección aquí
+
+# Compras Acumuladas Mensuales
 fig_acumulado_compras = px.line(
     compras_acumuladas, x='FECHA_TRANSACCION', y='MONTO',
     labels={'x': 'Fecha Transacción', 'y': 'Monto'},
@@ -99,9 +82,34 @@ fig_acumulado_compras.add_scatter(
     line=dict(color='blue')
 )
 st.plotly_chart(fig_acumulado_compras, use_container_width=True)
+col1, col2 = st.columns(2)
+fig_acumulado_ventas = px.bar(ventas_acumuladas,  x='MES', y='MONTO', title="Ventas Acumuladas Mensuales",
+orientation='v',color='AÑO',labels={'MES': 'Mes'})
+st.plotly_chart(fig_acumulado_ventas, use_container_width=True)
+# Top 10 Clientes
+top_clientes = ventas_filtradas.groupby('CLIENTE/PROVEEDOR')['MONTO'].sum().nlargest(10).reset_index()
+fig_top_clientes = px.bar(top_clientes, x='MONTO', y='CLIENTE/PROVEEDOR', orientation='h', labels={'MONTO':'MONTO (CLP)',
+'CLIENTE/PROVEEDOR':'RAZÓN SOCIAL'}, title="Top 10 Clientes (Ventas)")
+col1.plotly_chart(fig_top_clientes, use_container_width=True)
+col2.plotly_chart(px.pie(ventas_filtradas, names='FORMA_DE_PAGO', values='MONTO', title="Distribución por Forma de Pago (Ventas)"))
 
+# Distribución por Forma de Pago (Ventas)
+#st.plotly_chart(px.pie(ventas_filtradas, names='FORMA_DE_PAGO', values='MONTO', title="Distribución por Forma de Pago (Ventas)"))
+
+# SECCIÓN PROVEEDORES (COMPRAS)
+st.header(" Proveedores - Compras")
+col3, col4 = st.columns(2)
+
+# Top 10 Proveedores
+top_proveedores = compras_filtradas.groupby('CLIENTE/PROVEEDOR')['MONTO'].sum().nlargest(10).reset_index()
+# Crear el gráfico de barras con etiquetas personalizadas
+fig_top_proveedores = px.bar(top_proveedores, x='MONTO', y='CLIENTE/PROVEEDOR', orientation='h', title="Top 10 Proveedores", labels={'MONTO': 'Monto Total (CLP)', 'CLIENTE/PROVEEDOR': 'Proveedor'})
+
+col3.plotly_chart(fig_top_proveedores, use_container_width=True)
 # Distribución por Forma de Pago (Compras)
 col4.plotly_chart(px.pie(compras_filtradas, names='FORMA_DE_PAGO', values='MONTO', title="Distribución por Forma de Pago (Compras)"))
-
+fig_acumulado_compras = px.bar(compras_acumuladas, x='MES', y='MONTO', title="Compras Acumuladas Mensuales",
+orientation='v',color='AÑO',labels={'MES': 'Mes'})
+st.plotly_chart(fig_acumulado_compras, use_container_width=True)
 
 
