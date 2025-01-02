@@ -65,7 +65,7 @@ compras_acumuladas['AÑO'] = compras_acumuladas['FECHA_TRANSACCION'].dt.year  # 
 fig_acumulado_compras = px.line(
     compras_acumuladas, x='FECHA_TRANSACCION', y='MONTO',
     labels={'x': 'Fecha Transacción', 'y': 'Monto'},
-    title="Compras Acumuladas Mensuales"
+    title="Comparación de Compras y Ventas Acumuladas Mensuales"
 )
 fig_acumulado_compras.add_scatter(
     x=compras_acumuladas['FECHA_TRANSACCION'], 
