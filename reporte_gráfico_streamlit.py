@@ -87,7 +87,7 @@ fig_acumulado_ventas = px.bar(ventas_acumuladas,  x='MES', y='MONTO', title="Ven
 orientation='v',color='AÑO',labels={'MES': 'Mes'})
 st.plotly_chart(fig_acumulado_ventas, use_container_width=True)
 # Top 10 Clientes
-top_clientes = ventas_filtradas.groupby('CLIENTE/PROVEEDOR')['MONTO'].sum().nlargest(10).reset_index()
+top_clientes = ventas_filtradas.groupby('RAZON SOCIAL')['MONTO'].sum().nlargest(10).reset_index()
 fig_top_clientes = px.bar(top_clientes, x='MONTO', y='CLIENTE/PROVEEDOR', orientation='h', labels={'MONTO':'MONTO (CLP)',
 'CLIENTE/PROVEEDOR':'RAZÓN SOCIAL'}, title="Top 10 Clientes (Ventas)")
 col1.plotly_chart(fig_top_clientes, use_container_width=True)
@@ -101,7 +101,7 @@ st.header(" Proveedores - Compras")
 col3, col4 = st.columns(2)
 
 # Top 10 Proveedores
-top_proveedores = compras_filtradas.groupby('CLIENTE/PROVEEDOR')['MONTO'].sum().nlargest(10).reset_index()
+top_proveedores = compras_filtradas.groupby('RAZON SOCIAL')['MONTO'].sum().nlargest(10).reset_index()
 # Crear el gráfico de barras con etiquetas personalizadas
 fig_top_proveedores = px.bar(top_proveedores, x='MONTO', y='CLIENTE/PROVEEDOR', orientation='h', title="Top 10 Proveedores", labels={'MONTO': 'Monto Total (CLP)', 'CLIENTE/PROVEEDOR': 'Proveedor'})
 
