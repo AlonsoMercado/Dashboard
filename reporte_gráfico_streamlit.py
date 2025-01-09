@@ -108,14 +108,14 @@ fig_comparacion.add_scatter(
     name='Compras Acumuladas',
     line=dict(color='red')
 )
-fig_acumulado_compras.add_scatter(
+fig_comparacion.add_scatter(
     x=ventas_acumuladas['FECHA_TRANSACCION'], 
     y=ventas_acumuladas['MONTO'], 
     mode='lines', 
     name='Ventas Acumuladas',
     line=dict(color='blue')
 )
-st.plotly_chart(fig_acumulado_compras, use_container_width=True)
+st.plotly_chart(fig_comparacion, use_container_width=True)
 col3, col4 = st.columns(2)
 fig_acumulado_ventas = px.bar(ventas_acumuladas,  x='MES', y='MONTO', title="Ventas Acumuladas Mensuales",
 orientation='v',color='AÑO',labels={'MES': 'Mes'})
