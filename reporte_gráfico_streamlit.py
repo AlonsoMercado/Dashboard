@@ -92,10 +92,14 @@ col2.metric("Total Compras (CLP)", f"{compras_filtradas['MONTO'].sum():,.0f}")
 st.header("📊 Comparación de Ventas y Compras")
 ventas_acumuladas = ventas_filtradas.groupby(ventas_filtradas['FECHA_TRANSACCION'].dt.to_period('M'))['MONTO'].sum().reset_index()
 ventas_acumuladas['FECHA_TRANSACCION'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
+ventas_acumuladas['MES'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.month.map(meses)
+ventas_acumuladas['AÑO'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.year
 
+# Compras Acumuladas Mensuales
 compras_acumuladas = compras_filtradas.groupby(compras_filtradas['FECHA_TRANSACCION'].dt.to_period('M'))['MONTO'].sum().reset_index()
 compras_acumuladas['FECHA_TRANSACCION'] = compras_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
-
+compras_acumuladas['MES'] = compras_acumuladas['FECHA_TRANSACCION'].dt.month.map(meses)
+compras_acumuladas['AÑO'] = compras_acumuladas['FECHA_TRANSACCION'].dt.year
 fig_comparacion = px.line(
     ventas_acumuladas, x='FECHA_TRANSACCION', y='MONTO',
     title="Comparación de Ventas y Compras Mensuales Acumuladas",
@@ -117,8 +121,15 @@ fig_comparacion.add_scatter(
 )
 st.plotly_chart(fig_comparacion, use_container_width=True)
 col3, col4 = st.columns(2)
-fig_acumulado_ventas = px.bar(ventas_acumuladas,  x='MES', y='MONTO', title="Ventas Acumuladas Mensuales",
-orientation='v',color='AÑO',labels={'MES': 'Mes'})
+fig_acumulado_ventas = px.bar(
+    ventas_acumuladas, 
+    x='MES', 
+    y='MONTO', 
+    color='AÑO',
+    category_orders={"MES": list(meses.values())},  # Ordenar meses cronológicamente
+    labels={'MES': 'Mes', 'MONTO': 'Monto Total (CLP)', 'AÑO': 'Año'},
+    title="Ventas Acumuladas Mensuales"
+)
 st.plotly_chart(fig_acumulado_ventas, use_container_width=True)
 # Top 10 Clientes
 top_clientes = ventas_filtradas.groupby('RAZON SOCIAL')['MONTO'].sum().nlargest(10).reset_index()
@@ -142,8 +153,16 @@ fig_top_proveedores = px.bar(top_proveedores, x='MONTO', y='RAZON SOCIAL', orien
 col5.plotly_chart(fig_top_proveedores, use_container_width=True)
 # Distribución por Forma de Pago (Compras)
 col6.plotly_chart(px.pie(compras_filtradas, names='FORMA_DE_PAGO', values='MONTO', title="Distribución por Forma de Pago (Compras)"))
-fig_acumulado_compras = px.bar(compras_acumuladas, x='MES', y='MONTO', title="Compras Acumuladas Mensuales",
-orientation='v',color='AÑO',labels={'MES': 'Mes'})
+fig_acumulado_compras = px.bar(
+    compras_acumuladas, 
+    x='MES', 
+    y='MONTO', 
+    color='AÑO',
+    category_orders={"MES": list(meses.values())},  # Ordenar meses cronológicamente
+    labels={'MES': 'Mes', 'MONTO': 'Monto Total (CLP)', 'AÑO': 'Año'},
+    title="Compras Acumuladas Mensuales"
+)
+st.plotly_chart(fig_acumulado_compras, use_container_width=True)
 st.plotly_chart(fig_acumulado_compras, use_container_width=True)
 
 
