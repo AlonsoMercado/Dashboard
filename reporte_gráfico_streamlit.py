@@ -12,22 +12,27 @@ def cargar_datos():
 
 df_ventas, df_compras = cargar_datos()
 meses = {1: 'Enero', 2: 'Febrero', 3: 'Marzo', 4: 'Abril', 5: 'Mayo', 6: 'Junio',
-7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'}
+         7: 'Julio', 8: 'Agosto', 9: 'Septiembre', 10: 'Octubre', 11: 'Noviembre', 12: 'Diciembre'}
+
 # Preparar datos
 def preparar_datos(df):
-    df = df.rename(columns={'FECHA': 'FECHA_TRANSACCION', 'FECHA DOCUMENTO': 'FECHA_TRANSACCION','TOTAL': 'MONTO', 'RAZON SOCIAL': 'RAZON SOCIAL', 'FORMA DE PAGO': 'FORMA_DE_PAGO'})
+    df = df.rename(columns={'FECHA': 'FECHA_TRANSACCION', 'FECHA DOCUMENTO': 'FECHA_TRANSACCION',
+                            'TOTAL': 'MONTO', 'RAZON SOCIAL': 'RAZON SOCIAL', 'FORMA DE PAGO': 'FORMA_DE_PAGO'})
     df['FECHA_TRANSACCION'] = pd.to_datetime(df['FECHA_TRANSACCION'], dayfirst=True)
     df['FORMA_DE_PAGO'] = df['FORMA_DE_PAGO'].fillna("No indica medio").str.strip().str.lower()
     df['FORMA_DE_PAGO'] = df['FORMA_DE_PAGO'].replace({'credito': 'crédito'})
     df['AÑO'] = df['FECHA_TRANSACCION'].dt.year
     df['MES'] = df['FECHA_TRANSACCION'].dt.month.map(meses)
     return df
+
 df_ventas = preparar_datos(df_ventas)
 df_compras = preparar_datos(df_compras)
+
+# Sidebar: Filtros
 st.sidebar.header("Filtros")
 rango_fecha = st.sidebar.date_input("Rango de Fechas", [df_ventas['FECHA_TRANSACCION'].min(), df_ventas['FECHA_TRANSACCION'].max()])
 años_seleccionados = st.sidebar.multiselect("Años", sorted(df_ventas['AÑO'].unique()), default=None)
-meses_seleccionados = st.sidebar.multiselect("Meses", sorted(df_ventas['MES_NOMBRE'].unique(), key=lambda x: list(meses.values()).index(x)), default=None)
+meses_seleccionados = st.sidebar.multiselect("Meses", sorted(df_ventas['MES'].unique(), key=lambda x: list(meses.values()).index(x)), default=None)
 forma_pago = st.sidebar.multiselect("Forma de Pago", df_ventas['FORMA_DE_PAGO'].unique(), default=None)
 clientes = st.sidebar.multiselect("Clientes", df_ventas['RAZON SOCIAL'].unique(), default=None)
 proveedores = st.sidebar.multiselect("Proveedores", df_compras['RAZON SOCIAL'].unique(), default=None)
@@ -41,7 +46,7 @@ def filtrar_datos(df, tipo):
     if años_seleccionados:
         df_filtrado = df_filtrado[df_filtrado['AÑO'].isin(años_seleccionados)]
     if meses_seleccionados:
-        df_filtrado = df_filtrado[df_filtrado['MES_NOMBRE'].isin(meses_seleccionados)]
+        df_filtrado = df_filtrado[df_filtrado['MES'].isin(meses_seleccionados)]
     if forma_pago:
         df_filtrado = df_filtrado[df_filtrado['FORMA_DE_PAGO'].isin(forma_pago)]
     if tipo == 'ventas' and clientes:
