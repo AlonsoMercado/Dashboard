@@ -163,6 +163,6 @@ fig_acumulado_compras = px.bar(
     title="Compras Acumuladas Mensuales"
 )
 st.plotly_chart(fig_acumulado_compras, use_container_width=True)
-st.plotly_chart(fig_acumulado_compras, use_container_width=True)
+
 
 
