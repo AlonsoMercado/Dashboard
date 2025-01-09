@@ -28,14 +28,38 @@ def preparar_datos(df):
 df_ventas = preparar_datos(df_ventas)
 df_compras = preparar_datos(df_compras)
 
-# Sidebar: Filtros
+# Sidebar: Filtros dinámicos
 st.sidebar.header("Filtros")
+
+# Filtro de rango de fechas
 rango_fecha = st.sidebar.date_input("Rango de Fechas", [df_ventas['FECHA_TRANSACCION'].min(), df_ventas['FECHA_TRANSACCION'].max()])
+
+# Filtro de años
 años_seleccionados = st.sidebar.multiselect("Años", sorted(df_ventas['AÑO'].unique()), default=None)
-meses_seleccionados = st.sidebar.multiselect("Meses", sorted(df_ventas['MES'].unique(), key=lambda x: list(meses.values()).index(x)), default=None)
-forma_pago = st.sidebar.multiselect("Forma de Pago", df_ventas['FORMA_DE_PAGO'].unique(), default=None)
-clientes = st.sidebar.multiselect("Clientes", df_ventas['RAZON SOCIAL'].unique(), default=None)
-proveedores = st.sidebar.multiselect("Proveedores", df_compras['RAZON SOCIAL'].unique(), default=None)
+
+# Filtrar datos temporalmente por año
+ventas_temp = df_ventas
+compras_temp = df_compras
+if años_seleccionados:
+    ventas_temp = ventas_temp[ventas_temp['AÑO'].isin(años_seleccionados)]
+    compras_temp = compras_temp[compras_temp['AÑO'].isin(años_seleccionados)]
+
+# Filtro de meses
+meses_seleccionados = st.sidebar.multiselect(
+    "Meses",
+    sorted(ventas_temp['MES'].unique(), key=lambda x: list(meses.values()).index(x)),
+    default=None
+)
+
+# Filtro dinámico de clientes y proveedores
+clientes_disponibles = ventas_temp['RAZON SOCIAL'].unique()
+proveedores_disponibles = compras_temp['RAZON SOCIAL'].unique()
+
+clientes = st.sidebar.multiselect("Clientes", clientes_disponibles, default=None)
+proveedores = st.sidebar.multiselect("Proveedores", proveedores_disponibles, default=None)
+
+# Filtro de forma de pago
+forma_pago = st.sidebar.multiselect("Forma de Pago", ventas_temp['FORMA_DE_PAGO'].unique(), default=None)
 
 # Función de filtrado
 def filtrar_datos(df, tipo):
@@ -64,27 +88,23 @@ col1, col2 = st.columns(2)
 col1.metric("Total Ventas (CLP)", f"{ventas_filtradas['MONTO'].sum():,.0f}")
 col2.metric("Total Compras (CLP)", f"{compras_filtradas['MONTO'].sum():,.0f}")
 
+# Sección de gráficos
+st.header("📊 Comparación de Ventas y Compras")
 ventas_acumuladas = ventas_filtradas.groupby(ventas_filtradas['FECHA_TRANSACCION'].dt.to_period('M'))['MONTO'].sum().reset_index()
 ventas_acumuladas['FECHA_TRANSACCION'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
-ventas_acumuladas['MES'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.month
-ventas_acumuladas['AÑO'] = ventas_acumuladas['FECHA_TRANSACCION'].dt.year
 
-# Procesamiento de compras acumuladas
 compras_acumuladas = compras_filtradas.groupby(compras_filtradas['FECHA_TRANSACCION'].dt.to_period('M'))['MONTO'].sum().reset_index()
 compras_acumuladas['FECHA_TRANSACCION'] = compras_acumuladas['FECHA_TRANSACCION'].dt.to_timestamp()
-compras_acumuladas['MES'] = compras_acumuladas['FECHA_TRANSACCION'].dt.month  # Corrección aquí
-compras_acumuladas['AÑO'] = compras_acumuladas['FECHA_TRANSACCION'].dt.year  # Corrección aquí
 
-# Compras Acumuladas Mensuales
-fig_acumulado_compras = px.line(
-    compras_acumuladas, x='FECHA_TRANSACCION', y='MONTO',
-    labels={'x': 'Fecha Transacción', 'y': 'Monto'},
-    title="Comparación de Compras y Ventas Acumuladas Mensuales"
+fig_comparacion = px.line(
+    ventas_acumuladas, x='FECHA_TRANSACCION', y='MONTO',
+    title="Comparación de Ventas y Compras Mensuales Acumuladas",
+    labels={'FECHA_TRANSACCION': 'Fecha', 'MONTO': 'Monto Total (CLP)'}
 )
-fig_acumulado_compras.add_scatter(
-    x=compras_acumuladas['FECHA_TRANSACCION'], 
-    y=compras_acumuladas['MONTO'], 
-    mode='lines', 
+fig_comparacion.add_scatter(
+    x=compras_acumuladas['FECHA_TRANSACCION'],
+    y=compras_acumuladas['MONTO'],
+    mode='lines',
     name='Compras Acumuladas',
     line=dict(color='red')
 )
