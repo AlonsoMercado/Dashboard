@@ -50,7 +50,10 @@ meses_seleccionados = st.sidebar.multiselect(
     sorted(ventas_temp['MES'].unique(), key=lambda x: list(meses.values()).index(x)),
     default=None
 )
-
+if meses_seleccionados:
+    ventas_temp = ventas_temp[ventas_temp['MES'].isin(meses_seleccionados)]
+    compras_temp = compras_temp[compras_temp['MES'].isin(meses_seleccionados)]
+    
 # Filtro dinámico de clientes y proveedores
 clientes_disponibles = ventas_temp['RAZON SOCIAL'].unique()
 proveedores_disponibles = compras_temp['RAZON SOCIAL'].unique()
